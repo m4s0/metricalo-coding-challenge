@@ -1,0 +1,55 @@
+name: Symfony CI
+
+run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+
+on: [ push ]
+
+env:
+  PORT: 3000
+  NODE_ENV: test
+  DB_HOST: 127.0.0.1
+  DB_PORT: 5432
+  DB_USERNAME: username
+  DB_PASSWORD: password
+  DB_DATABASE: test-db
+  DB_DATABASE_TEST: test-db
+  JWT_SECRET: fill_me
+  JWT_EXPIRATION_TIME: 3600
+
+jobs:
+  regression-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17.4
+        env:
+          POSTGRES_PASSWORD: ${{ env.DB_PASSWORD }}
+          POSTGRES_HOST: ${{ env.DB_HOST}}
+          POSTGRES_PORT: ${{ env.DB_PORT}}
+          POSTGRES_USER: ${{ env.DB_USERNAME}}
+          POSTGRES_DB: ${{ env.DB_DATABASE_TEST}}
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+      - run: cd app && composer install --no-interaction --no-progress --no-scripts
+      - name: Run tests
+        env:
+            DATABASE_URL: "postgresql://${{ env.DB_USERNAME }}:${{ env.DB_PASSWORD }}@localhost:${{ env.DB_PORT }}/${{ env.DB_DATABASE }}?charset=utf8"
+        run:
+            cd app && vendor/bin/phpunit --testdox --colors=always
+      - run: echo "🍏 This job's status is ${{ job.status }}."
