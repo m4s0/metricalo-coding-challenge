@@ -6,15 +6,16 @@ on: [ push ]
 
 env:
   PORT: 3000
-  NODE_ENV: test
+  APP_ENV: test
   DB_HOST: 127.0.0.1
   DB_PORT: 5432
   DB_USERNAME: username
   DB_PASSWORD: password
-  DB_DATABASE: test-db
   DB_DATABASE_TEST: test-db
-  JWT_SECRET: fill_me
-  JWT_EXPIRATION_TIME: 3600
+  SHIFT4_SECRET_KEY: sk_test_your_shift4_key_here
+  ACI_API_KEY: your_aci_auth_key_here
+  ACI_ENTITY_ID: your_aci_entity_id_here
+  ACI_API_URL: ''
 
 jobs:
   regression-tests:
@@ -49,7 +50,7 @@ jobs:
       - run: cd app && composer install --no-interaction --no-progress --no-scripts
       - name: Run tests
         env:
-            DATABASE_URL: "postgresql://${{ env.DB_USERNAME }}:${{ env.DB_PASSWORD }}@localhost:${{ env.DB_PORT }}/${{ env.DB_DATABASE }}?charset=utf8"
+            DATABASE_URL_TEST: "postgresql://${{ env.DB_USERNAME }}:${{ env.DB_PASSWORD }}@localhost:${{ env.DB_PORT }}/${{ env.DB_DATABASE_TEST }}?charset=utf8"
         run:
             cd app && vendor/bin/phpunit --testdox --colors=always
       - run: echo "🍏 This job's status is ${{ job.status }}."
